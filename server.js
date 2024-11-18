@@ -94,7 +94,7 @@ function initializeDatabase() {
         });
     });
 
-    return db;
+    return KitchenLightsdb;
 }
 
 // API to fetch the current brightness
