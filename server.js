@@ -75,7 +75,7 @@ app.post('/api/camera', (req, res) => {
 // Kitchen-lights code
 // Function to initialize the database and ensure the table exists
 function initializeDatabase() {
-    const db = new sqlite3.Database(path.join(__dirname, 'kitchenlights.db'), (err) => {
+    const KitchenLightsdb = new sqlite3.Database(path.join(__dirname, 'kitchenlights.db'), (err) => {
         if (err) {
             console.error('Error opening database:', err);
         } else {
@@ -84,12 +84,12 @@ function initializeDatabase() {
     });
 
     // Create the table if it doesn't exist
-    db.serialize(() => {
-        db.run('CREATE TABLE IF NOT EXISTS kitchen_lights (id INTEGER PRIMARY KEY, brightness INTEGER)');
-        db.get('SELECT COUNT(*) AS count FROM kitchen_lights', (err, row) => {
+    KitchenLightsdb.serialize(() => {
+        KitchenLightsdb.run('CREATE TABLE IF NOT EXISTS kitchen_lights (id INTEGER PRIMARY KEY, brightness INTEGER)');
+        KitchenLightsdb.get('SELECT COUNT(*) AS count FROM kitchen_lights', (err, row) => {
             if (row.count === 0) {
                 // Insert initial brightness value (e.g., 0)
-                db.run('INSERT INTO kitchen_lights (brightness) VALUES (0)');
+                KitchenLightsdb.run('INSERT INTO kitchen_lights (brightness) VALUES (0)');
             }
         });
     });
@@ -138,7 +138,7 @@ app.post('/api/kitchen-lights', (req, res) => {
 app.use(bodyParser.json());
 
 // Initialize SQLite Database
-const db = new sqlite3.Database('garage.db', (err) => {
+const Garagedb = new sqlite3.Database('garage.db', (err) => {
     if (err) {
         console.error('Error opening database:', err);
     } else {
@@ -147,7 +147,7 @@ const db = new sqlite3.Database('garage.db', (err) => {
 });
 
 // Create table if not exists
-db.run(`
+Garagedb.run(`
     CREATE TABLE IF NOT EXISTS garage (
         id INTEGER PRIMARY KEY,
         gateStatus INTEGER NOT NULL,
@@ -157,7 +157,7 @@ db.run(`
 
 // Endpoint to get the current garage gate status and code
 app.get('/api/garage', (req, res) => {
-    db.get('SELECT gateStatus, garageCode FROM garage WHERE id = 1', (err, row) => {
+    Garagedb.get('SELECT gateStatus, garageCode FROM garage WHERE id = 1', (err, row) => {
         if (err) {
             res.status(500).json({ error: 'Failed to fetch data' });
         } else if (row) {
@@ -172,7 +172,7 @@ app.get('/api/garage', (req, res) => {
 // Endpoint to update the gate status
 app.post('/api/garage/status', (req, res) => {
     const { gateStatus } = req.body;
-    db.run('UPDATE garage SET gateStatus = ? WHERE id = 1', [gateStatus], function(err) {
+    Garagedb.run('UPDATE garage SET gateStatus = ? WHERE id = 1', [gateStatus], function(err) {
         if (err) {
             res.status(500).json({ error: 'Failed to update gate status' });
         } else {
@@ -184,11 +184,11 @@ app.post('/api/garage/status', (req, res) => {
 // Endpoint to update the garage code
 app.post('/api/garage/code', (req, res) => {
     const { oldCode, newCode } = req.body;
-    db.get('SELECT garageCode FROM garage WHERE id = 1', (err, row) => {
+    Garagedb.get('SELECT garageCode FROM garage WHERE id = 1', (err, row) => {
         if (err) {
             res.status(500).json({ error: 'Failed to fetch garage code' });
         } else if (row && row.garageCode === oldCode) {
-            db.run('UPDATE garage SET garageCode = ? WHERE id = 1', [newCode], function(err) {
+            Garagedb.run('UPDATE garage SET garageCode = ? WHERE id = 1', [newCode], function(err) {
                 if (err) {
                     res.status(500).json({ error: 'Failed to update garage code' });
                 } else {
@@ -204,7 +204,7 @@ app.post('/api/garage/code', (req, res) => {
 //Garage lights:
 
     // Create table if not exists for garage lights
-db.run(`
+Garagedb.run(`
     CREATE TABLE IF NOT EXISTS garage_lights (
         id INTEGER PRIMARY KEY,
         position INTEGER NOT NULL,
@@ -213,18 +213,18 @@ db.run(`
 `);
 
 // Set initial values if the table is empty
-db.get('SELECT * FROM garage_lights WHERE id = 1', (err, row) => {
+Garagedb.get('SELECT * FROM garage_lights WHERE id = 1', (err, row) => {
     if (err) {
         console.error('Error fetching data:', err);
     } else if (!row) {
         // Insert initial default values if no data exists
-        db.run('INSERT INTO garage_lights (id, position, brightness) VALUES (1, 0, 0)');
+        Garagedb.run('INSERT INTO garage_lights (id, position, brightness) VALUES (1, 0, 0)');
     }
 });
 
 // Endpoint to get the current garage light position and brightness
 app.get('/api/garage/lights', (req, res) => {
-    db.get('SELECT position, brightness FROM garage_lights WHERE id = 1', (err, row) => {
+    Garagedb.get('SELECT position, brightness FROM garage_lights WHERE id = 1', (err, row) => {
         if (err) {
             res.status(500).json({ error: 'Failed to fetch light data' });
         } else if (row) {
@@ -238,7 +238,7 @@ app.get('/api/garage/lights', (req, res) => {
 // Endpoint to update the garage light position and brightness
 app.post('/api/garage/lights', (req, res) => {
     const { position, brightness } = req.body;
-    db.run('UPDATE garage_lights SET position = ?, brightness = ? WHERE id = 1', [position, brightness], function(err) {
+    Garagedb.run('UPDATE garage_lights SET position = ?, brightness = ? WHERE id = 1', [position, brightness], function(err) {
         if (err) {
             res.status(500).json({ error: 'Failed to update light data' });
         } else {
@@ -252,7 +252,7 @@ app.post('/api/garage/lights', (req, res) => {
 // LivingLights
 
 // SQLite Database Setup
-const db = new sqlite3.Database('./livinglights.db', (err) => {
+const LivingLightsdb = new sqlite3.Database('./livinglights.db', (err) => {
     if (err) {
         console.error('Error opening database:', err.message);
     } else {
@@ -261,21 +261,21 @@ const db = new sqlite3.Database('./livinglights.db', (err) => {
 });
 
 // Initialize the brightness table
-db.serialize(() => {
-    db.run(`
+LivingLightsdb.serialize(() => {
+    LivingLightsdb.run(`
         CREATE TABLE IF NOT EXISTS living_lights (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             brightness REAL
         )
     `);
-    db.run(`
+    LivingLightsdb.run(`
         INSERT OR IGNORE INTO living_lights (id, brightness) VALUES (1, 0.5)
     `); // Default brightness is 50%
 });
 
 // GET: Fetch current brightness
 app.get('/api/living-lights', (req, res) => {
-    db.get('SELECT brightness FROM living_lights WHERE id = 1', (err, row) => {
+    LivingLightsdb.get('SELECT brightness FROM living_lights WHERE id = 1', (err, row) => {
         if (err) {
             console.error('Error fetching brightness:', err.message);
             res.status(500).json({ error: 'Database error' });
@@ -293,7 +293,7 @@ app.post('/api/living-lights', (req, res) => {
         return res.status(400).json({ error: 'Invalid brightness value' });
     }
 
-    db.run('UPDATE living_lights SET brightness = ? WHERE id = 1', [brightness], (err) => {
+    LivingLightsdb.run('UPDATE living_lights SET brightness = ? WHERE id = 1', [brightness], (err) => {
         if (err) {
             console.error('Error updating brightness:', err.message);
             res.status(500).json({ error: 'Database error' });
@@ -305,7 +305,7 @@ app.post('/api/living-lights', (req, res) => {
 
 // StudyRoom Lights
 // SQLite Database Setup
-const db = new sqlite3.Database('./studyroom.db', (err) => {
+const StudyroomLightsdb = new sqlite3.Database('./studyroom.db', (err) => {
     if (err) {
         console.error('Error opening database:', err.message);
     } else {
@@ -315,20 +315,20 @@ const db = new sqlite3.Database('./studyroom.db', (err) => {
 
 // Initialize the brightness table
 db.serialize(() => {
-    db.run(`
+    StudyroomLightsdb.run(`
         CREATE TABLE IF NOT EXISTS studyroom_lights (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             brightness REAL
         )
     `);
-    db.run(`
+    StudyroomLightsdb.run(`
         INSERT OR IGNORE INTO studyroom_lights (id, brightness) VALUES (1, 0.5)
     `); // Default brightness is 50%
 });
 
 // GET: Fetch current brightness
 app.get('/api/studyroom-lights', (req, res) => {
-    db.get('SELECT brightness FROM studyroom_lights WHERE id = 1', (err, row) => {
+    StudyroomLightsdb.get('SELECT brightness FROM studyroom_lights WHERE id = 1', (err, row) => {
         if (err) {
             console.error('Error fetching brightness:', err.message);
             res.status(500).json({ error: 'Database error' });
@@ -346,7 +346,7 @@ app.post('/api/studyroom-lights', (req, res) => {
         return res.status(400).json({ error: 'Invalid brightness value' });
     }
 
-    db.run('UPDATE studyroom_lights SET brightness = ? WHERE id = 1', [brightness], (err) => {
+    StudyroomLightsdb.run('UPDATE studyroom_lights SET brightness = ? WHERE id = 1', [brightness], (err) => {
         if (err) {
             console.error('Error updating brightness:', err.message);
             res.status(500).json({ error: 'Database error' });
@@ -379,7 +379,7 @@ app.post('/api/tv-off', (req, res) => {
 
 // Kitchen Stove
 // SQLite Database Setup
-const db = new sqlite3.Database('./kitchen.db', (err) => {
+const KitchenStovedb = new sqlite3.Database('./kitchen.db', (err) => {
     if (err) {
         console.error('Error opening database:', err.message);
     } else {
@@ -389,7 +389,7 @@ const db = new sqlite3.Database('./kitchen.db', (err) => {
 
 // Initialize database
 db.serialize(() => {
-    db.run(`
+    KitchenStovedb.run(`
         CREATE TABLE IF NOT EXISTS stoves (
             id INTEGER PRIMARY KEY,
             state INTEGER DEFAULT 0,
@@ -399,7 +399,7 @@ db.serialize(() => {
 
     // Initialize 4 stoves
     for (let i = 1; i <= 4; i++) {
-        db.run(`INSERT OR IGNORE INTO stoves (id, state, strength) VALUES (?, 0, 0)`, [i]);
+        KitchenStovedb.run(`INSERT OR IGNORE INTO stoves (id, state, strength) VALUES (?, 0, 0)`, [i]);
     }
 });
 
@@ -409,7 +409,7 @@ db.serialize(() => {
 app.get('/api/stove/:id', (req, res) => {
     const id = req.params.id;
 
-    db.get('SELECT state, strength FROM stoves WHERE id = ?', [id], (err, row) => {
+    KitchenStovedb.get('SELECT state, strength FROM stoves WHERE id = ?', [id], (err, row) => {
         if (err) {
             console.error('Error fetching stove data:', err.message);
             res.status(500).json({ error: 'Database error' });
