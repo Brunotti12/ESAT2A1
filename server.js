@@ -471,7 +471,6 @@ app.post('/api/soundbox/state', (req, res) => {
         res.status(400).json({ success: false, message: "Ongeldige status" });
     }
 });
-=======
 //CoffeeMachine
 
 // SQLite Database Setup voor koffiemachine
