@@ -236,38 +236,63 @@
         const toggleLabel = document.getElementById("toggleLabel");
 
         // Load TV state from localStorage
-        const savedState = localStorage.getItem("tvState");
-        if (savedState === "on") {
-            toggleSwitch.checked = true;
-            toggleLabel.textContent = "On";
-            toggleLabel.classList.remove("off");
-            toggleLabel.classList.add("on");
-        } else {
-            toggleSwitch.checked = false;
-            toggleLabel.textContent = "Off";
-            toggleLabel.classList.remove("on");
-            toggleLabel.classList.add("off");
+        const apiBaseUrl = "http://localhost:3000/api/television"; // Backend API URL
+
+        // Haal de huidige TV-status op van de server
+        async function fetchTvState() {
+            try {
+                const response = await fetch(`${apiBaseUrl}/state`);
+                const data = await response.json();
+                return data.state; // Verwacht: "on" of "off"
+            } catch (error) {
+                console.error("Fout bij het ophalen van de TV-status:", error);
+                return "off"; // Standaard status bij een fout
+            }
         }
 
-        toggleSwitch.addEventListener("change", () => {
-            const isChecked = toggleSwitch.checked;
+        // Werk de TV-status bij op de server
+        async function updateTvState(state) {
+            try {
+                const response = await fetch(`${apiBaseUrl}/state`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ state }),
+                });
+                const data = await response.json();
+                return data.success;
+            } catch (error) {
+                console.error("Fout bij het updaten van de TV-status:", error);
+                return false;
+            }
+        }
 
-            toggleLabel.textContent = isChecked ? "Turning On..." : "Turning Off...";
-            setTimeout(() => {
-                if (isChecked) {
-                    toggleLabel.textContent = "On";
-                    toggleLabel.classList.remove("off");
-                    toggleLabel.classList.add("on");
-                    localStorage.setItem("tvState", "on"); 
-                } else {
-                    toggleLabel.textContent = "Off";
-                    toggleLabel.classList.remove("on");
-                    toggleLabel.classList.add("off");
-                    localStorage.setItem("tvState", "off"); 
-                }
-            }, 5000); 
+        // Initialiseer de status bij het laden van de pagina
+        window.onload = async function () {
+            const savedState = await fetchTvState();
+            toggleSwitch.checked = savedState === "on";
+            toggleLabel.textContent = savedState === "on" ? "On" : "Off";
+            toggleLabel.classList.toggle("on", savedState === "on");
+            toggleLabel.classList.toggle("off", savedState !== "on");
+        };
+
+        // Verwerk wijzigingen in de toggle-switch
+        toggleSwitch.addEventListener("change", async () => {
+            const newState = toggleSwitch.checked ? "on" : "off";
+            toggleLabel.textContent = toggleSwitch.checked ? "Turning On..." : "Turning Off...";
+            const success = await updateTvState(newState);
+
+            if (success) {
+                setTimeout(() => {
+                    toggleLabel.textContent = toggleSwitch.checked ? "On" : "Off";
+                    toggleLabel.classList.toggle("on", toggleSwitch.checked);
+                    toggleLabel.classList.toggle("off", !toggleSwitch.checked);
+                }, 500);
+            } else {
+                alert("Fout bij het updaten van de TV-status. Probeer opnieuw.");
+                toggleSwitch.checked = !toggleSwitch.checked; // Keer terug naar vorige status
+            }
         });
-    </script>
+</script>
 
 </body>
 
