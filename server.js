@@ -388,7 +388,7 @@ const KitchenStovedb = new sqlite3.Database('./kitchen.db', (err) => {
 });
 
 // Initialize database
-db.serialize(() => {
+KitchenStovedb.serialize(() => {
     KitchenStovedb.run(`
         CREATE TABLE IF NOT EXISTS stoves (
             id INTEGER PRIMARY KEY,
