@@ -314,7 +314,7 @@ const StudyroomLightsdb = new sqlite3.Database('./studyroom.db', (err) => {
 });
 
 // Initialize the brightness table
-db.serialize(() => {
+StudyroomLightsdb.serialize(() => {
     StudyroomLightsdb.run(`
         CREATE TABLE IF NOT EXISTS studyroom_lights (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
