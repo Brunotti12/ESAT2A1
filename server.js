@@ -24,7 +24,7 @@ app.get('/api/settings', (req, res) => {
 });
 
 // SQLite database setup
-const db = new sqlite3.Database('./cameraData.db')
+const databasedb = new sqlite3.Database('./cameraData.db')
 
 // Route to update the alarm status
 app.post('/api/settings/status', (req, res) => {
@@ -50,8 +50,8 @@ app.post('/api/settings/update', (req, res) => {
 
 // Camera code
 // Initialize database schema (if not already present)
-db.serialize(() => {
-    db.run("CREATE TABLE IF NOT EXISTS camera_data (id INTEGER PRIMARY KEY AUTOINCREMENT, status TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)");
+databasedb.serialize(() => {
+    databasedb.run("CREATE TABLE IF NOT EXISTS camera_data (id INTEGER PRIMARY KEY AUTOINCREMENT, status TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)");
 });
 
 // API endpoint to store camera data (status)
