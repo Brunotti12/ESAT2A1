@@ -135,7 +135,7 @@ app.post('/api/kitchen-lights', (req, res) => {
 
 
 // Middleware to parse JSON
-app.use(bodyParser.json());
+app.use(express.json());
 
 // Initialize SQLite Database
 const Garagedb = new sqlite3.Database('garage.db', (err) => {
