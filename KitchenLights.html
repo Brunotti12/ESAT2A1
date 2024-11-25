@@ -109,58 +109,79 @@
         <div class="box" id="draggableBox"></div>
     </div>
     <i class="fas fa-lightbulb brightness-icon" id="brightnessIcon"></i>
-    <script>
+    <script>       
+     
+        document.addEventListener("DOMContentLoaded", () => {
         const box = document.getElementById('draggableBox');
         const balk = document.querySelector('.balk');
         const brightnessIcon = document.getElementById('brightnessIcon');
 
-        // Fetch brightness value from the server and update UI
-        fetch('http://localhost:3000/api/kitchen-lights')
+        fetch('http://localhost:3000/api/kitchenLight')
             .then(response => response.json())
             .then(data => {
-                const initialPosition = data.brightness || 0;
-                box.style.left = `${initialPosition}px`;
+                let position = data.position;
+                let brightness = data.brightness;
 
-                const initialBrightness = initialPosition / (balk.offsetWidth - box.offsetWidth);
-                brightnessIcon.style.opacity = initialBrightness;
-            })
-            .catch(error => {
-                console.error('Error fetching brightness:', error);
-            });
-
-        let isDragging = false;
-
-        box.addEventListener('mousedown', () => {
-            isDragging = true;
-        });
-
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                let x = e.clientX - balk.offsetLeft - box.offsetWidth / 2;
-
-                if (x < 0) x = 0;
-                if (x > balk.offsetWidth - box.offsetWidth) x = balk.offsetWidth - box.offsetWidth;
-
-                box.style.left = `${x}px`;
-
-                const brightness = (x / (balk.offsetWidth - box.offsetWidth));
+                box.style.left = `${position}px`;
                 brightnessIcon.style.opacity = brightness;
+            })
 
-                // Update brightness on the server when user drags
-                fetch('http://localhost:3000/api/kitchen-lights', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ brightness: x })
-                })
-                .catch(error => {
-                    console.error('Error updating brightness:', error);
-                });
-            }
-        });
+    // Function to update garage light data on the backend
+    async function updateLightData(position, brightness) {
+        try {
+            await fetch('http://localhost:3000/api/kitchenLight/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ newPosition: position, newBrightness: brightness }),
+            });
+        } catch (error) {
+            console.error('Error updating light data:', error);
+        }
+    }
+
+    let debounceTimeout;
+
+    function debounceUpdate(position, brightness) {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(() => {
+            updateLightData(position, brightness);
+        }, 100); // Adjust the delay (in milliseconds) as needed
+    }
+
+
+
+    // Store the initial position and brightness
+    let isDragging = false;
+
+    box.addEventListener('mousedown', () => {
+        isDragging = true;
+    });
+
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            let x = e.clientX - balk.offsetLeft - box.offsetWidth / 2;
+
+            if (x < 0) x = 0;
+            if (x > balk.offsetWidth - box.offsetWidth) x = balk.offsetWidth - box.offsetWidth;
+
+            box.style.left = `${x}px`;
+
+            // Calculate brightness based on position
+            const brightness = x / (balk.offsetWidth - box.offsetWidth);
+            brightnessIcon.style.opacity = brightness;
+
+            // Send the updated position and brightness to the backend
+            debounceUpdate(x, brightness);
+        }
+    });
+});
+
     </script>
 </body>
 </html>

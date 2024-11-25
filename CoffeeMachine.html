@@ -295,20 +295,20 @@
         const coffeeQueueList = document.getElementById("coffeeQueueList");
         const progressContainer = document.querySelector(".progress-container");
         const progressBar = document.getElementById("progressBar");
-
+    
         const espressoButton = document.getElementById("espressoButton");
         const longoButton = document.getElementById("longoButton");
         const cappuccinoButton = document.getElementById("cappuccinoButton");
         const latteButton = document.getElementById("latteButton");
-
+    
         let coffeeQueue = [];
-
+    
         // Fetch initial machine state
         async function fetchInitialState() {
             try {
                 const response = await fetch('/api/coffee-machine');
                 if (!response.ok) throw new Error('Failed to fetch initial state');
-
+    
                 const data = await response.json();
                 toggleSwitch.checked = data.power;
                 toggleLabel.textContent = data.power ? 'On' : 'Off';
@@ -320,7 +320,7 @@
                 alert('Failed to load initial data.');
             }
         }
-
+    
         toggleSwitch.addEventListener("change", async () => {
             const isTurningOn = toggleSwitch.checked;
             try {
@@ -330,7 +330,7 @@
                     body: JSON.stringify({ power: isTurningOn })
                 });
                 if (!response.ok) throw new Error('Failed to update power state');
-
+    
                 toggleLabel.textContent = isTurningOn ? 'On' : 'Off';
                 toggleLabel.classList.toggle('on', isTurningOn);
                 toggleLabel.classList.toggle('off', !isTurningOn);
@@ -340,20 +340,20 @@
                 alert('Failed to update power state.');
             }
         });
-
+    
         function disableButtons(disable) {
             [espressoButton, longoButton, cappuccinoButton, latteButton].forEach(button => {
                 button.style.pointerEvents = disable ? 'none' : 'auto';
                 button.style.opacity = disable ? '0.5' : '1';
             });
         }
-
+    
         function addToQueue(coffeeType) {
             if (!toggleSwitch.checked) {
                 alert("The coffee machine is off. Please turn it on first.");
                 return;
             }
-
+    
             fetch('/api/coffee-machine/order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -372,46 +372,52 @@
                 alert('Failed to add coffee to queue.');
             });
         }
-
+    
         function updateCoffeeQueue() {
             coffeeQueueList.innerHTML = '';
             coffeeQueue.forEach((coffee, index) => {
                 const li = document.createElement('li');
                 li.textContent = `${index + 1}. ${coffee}`;
+                const progress = document.createElement('div');
+                progress.classList.add('progress-container');
+                progress.innerHTML = '<div class="progress-bar" style="width: 0%;"></div>';
+                li.appendChild(progress);
                 coffeeQueueList.appendChild(li);
             });
         }
-
+    
         function startCoffeePreparation() {
             if (coffeeQueue.length === 0) return;
-
-            progressContainer.style.display = 'block';
-            progressBar.style.width = '0%';
-
+    
             let progress = 0;
+            const currentCoffee = coffeeQueue[0];
+            const queueItem = coffeeQueueList.querySelector('li');  // The first queue item (first coffee)
+            const progressBar = queueItem.querySelector('.progress-bar');
+    
             const interval = setInterval(() => {
                 progress += 10;
                 progressBar.style.width = `${progress}%`;
-
+    
                 if (progress >= 100) {
                     clearInterval(interval);
-                    progressContainer.style.display = 'none';
                     coffeeQueue.shift();
                     updateCoffeeQueue();
-                    startCoffeePreparation();
+                    if (coffeeQueue.length > 0) {
+                        startCoffeePreparation(); // Start the next coffee order
+                    }
                 }
             }, 1000);
         }
-
+    
         espressoButton.addEventListener("click", () => addToQueue("Espresso"));
         longoButton.addEventListener("click", () => addToQueue("Longo"));
         cappuccinoButton.addEventListener("click", () => addToQueue("Cappuccino"));
         latteButton.addEventListener("click", () => addToQueue("Latte"));
-
+    
         // Load initial data when the page loads
         fetchInitialState();
     </script>
-
+    
 </body>
 </html>
 

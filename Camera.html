@@ -163,14 +163,17 @@
     </div>
 
     <script>
-    let isCameraOn = false;
+    let isCameraOn;
+
+    fetch('http://localhost:3000/api/garage')
+        .then(response => response.json())
+        .then(data => {
+            isCameraOn = data.cameraStatus;
+        })
 
     window.onload = function() {
-        // On load, check if the camera state is saved in localStorage
-        const cameraState = localStorage.getItem('cameraState');
-        if (cameraState === 'true') {
-            isCameraOn = true;
-            document.getElementById('cameraButton').classList.add('active');
+        if(isCameraOn){
+            document.getElemntById('cameraButton').classList.add('active');
             startCamera();
         }
     };

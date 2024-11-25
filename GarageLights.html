@@ -178,43 +178,45 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-    const box = document.getElementById('draggableBox');
-    const balk = document.querySelector('.balk');
-    const brightnessIcon = document.getElementById('brightnessIcon');
+        const box = document.getElementById('draggableBox');
+        const balk = document.querySelector('.balk');
+        const brightnessIcon = document.getElementById('brightnessIcon');
 
-    // Function to fetch garage light data from the backend
-    async function fetchLightData() {
-        try {
-            const response = await fetch('/api/garage/lights');
-            const data = await response.json();
-            if (data) {
-                const { position, brightness } = data;
-                // Set the position of the box and brightness icon
+        fetch('http://localhost:3000/api/garageLight')
+            .then(response => response.json())
+            .then(data => {
+                let position = data.position;
+                let brightness = data.brightness;
+
                 box.style.left = `${position}px`;
                 brightnessIcon.style.opacity = brightness;
-            }
-        } catch (error) {
-            console.error('Error fetching light data:', error);
-        }
-    }
+            })
 
     // Function to update garage light data on the backend
     async function updateLightData(position, brightness) {
         try {
-            await fetch('/api/garage/lights', {
+            await fetch('http://localhost:3000/api/garageLight/update', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ position, brightness }),
+                body: JSON.stringify({ newPosition: position, newBrightness: brightness }),
             });
         } catch (error) {
             console.error('Error updating light data:', error);
         }
     }
 
-    // Fetch the initial light data when the page loads
-    fetchLightData();
+    let debounceTimeout;
+
+    function debounceUpdate(position, brightness) {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(() => {
+            updateLightData(position, brightness);
+        }, 100); // Adjust the delay (in milliseconds) as needed
+    }
+
+
 
     // Store the initial position and brightness
     let isDragging = false;
@@ -241,7 +243,7 @@
             brightnessIcon.style.opacity = brightness;
 
             // Send the updated position and brightness to the backend
-            updateLightData(x, brightness);
+            debounceUpdate(x, brightness);
         }
     });
 });
@@ -249,7 +251,6 @@
     </script>
     
 
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 
 </html>
