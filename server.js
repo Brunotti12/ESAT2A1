@@ -20,7 +20,7 @@ const garageLightDb = new sqlite3.Database('./garage_lights');
 const studyLightDb = new sqlite3.Database('./studyRoomLight.db');
 const cameraDb = new sqlite3.Database('./camera.db');
 const kitchenLightDb = new sqlite3.Database('./kitchenLight.db');
-
+const LivingLightsDB = new sqlite3.Database('./livinglights.db');
 
 
 // Routes
@@ -88,6 +88,7 @@ app.post('/api/settings/update', (req, res) => {
 }
 
 // Garage
+
 {
 app.get('/api/garage', (req, res) => {
     garageDb.get("SELECT * FROM garage WHERE id = 1", [], (err, row) => {
@@ -153,7 +154,7 @@ app.post('/api/garage/update', (req, res) => {
 
 
 app.get('/api/garage_lights', (req, res) => {
-    garageLightDb.get("SELECT * FROM garage_lights WHERE id = 1", [], (err, row) => {
+    garageDb.get("SELECT * FROM garage_lights WHERE id = 1", [], (err, row) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ message: 'Error fetching light settings' });
@@ -167,7 +168,7 @@ app.get('/api/garage_lights', (req, res) => {
 
 app.post('/api/garage_lights/update', (req, res) => {
     const { newPosition, newBrightness } = req.body;
-    garageLightDb.run("UPDATE garage_lights SET position = ? WHERE id = 1", [newPosition], function (err) {
+    garageDb.run("UPDATE garage_lights SET position = ? WHERE id = 1", [newPosition], function (err) {
         if(err){
             console.error(err);
             return res.status(500).json({message: "Error saving location data"});
@@ -216,8 +217,7 @@ app.post('/api/camera', (req, res) => {
 }
 
 //study Room
-{
-app.get('/api/studyRoomLight', (req, res) => {
+app.get('/api/studyroom-lights', (req, res) => {
     studyLightDb.get("SELECT * FROM studyRoomLight WHERE id = 1", [], (err, row) => {
         if(err){
             console.error(err);
@@ -230,7 +230,7 @@ app.get('/api/studyRoomLight', (req, res) => {
     });
 });
 
-app.post('/api/studyRoomLight/update', (req, res) => {
+app.post('/api/studyroom-lights/update', (req, res) => {
     const {newPosition, newBrightness} = req.body;
     studyLightDb.run("UPDATE studyRoomLight SET brightness = ? WHERE id = 1", [newBrightness], function (err){
         if(err){
@@ -282,6 +282,40 @@ app.post('/api/kitchenLight/update', (req, res) => {
 });
 }
 
+// LivingLights
+{
+
+    app.get('/api/living-lights', (req, res) => {
+        LivingLightsDB.get("SELECT * FROM living_lights WHERE id = 1", [], (err, row) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: 'Error fetching light settings' });
+            }
+            if (!row) {
+                return res.status(404).json({ message: 'Light settings not found' });
+            }
+            res.json({ position: row.position, brightness: row.brightness });
+        });
+    });
+    
+    app.post('/api/living-lights/update', (req, res) => {
+        const { newPosition, newBrightness } = req.body;
+        LivingLightsDB.run("UPDATE living_lights SET position = ? WHERE id = 1", [newPosition], function (err) {
+            if(err){
+                console.error(err);
+                return res.status(500).json({message: "Error saving location data"});
+            }
+        });
+        LivingLightsDB.run("Update living_lights SET brightness = ? WHERE id = 1", [newBrightness], function (err){
+            if(err){
+                console.error(err);
+                return res.status(500).json({message: "Error saving brightness data"});
+            }
+        });
+    
+    });
+    
+}
 
 // Start Server
 app.listen(port, '0.0.0.0', () => {
