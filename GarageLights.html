@@ -195,7 +195,7 @@
     // Function to update garage light data on the backend
     async function updateLightData(position, brightness) {
         try {
-            await fetch('http://192.168.2.102:3000/api/garageLight/update', {
+            await fetch('http://192.168.2.102:3000/api/garage_lights/update', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
