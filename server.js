@@ -16,7 +16,7 @@ app.use(express.json());
 
 const alarmDb = new sqlite3.Database('./alarm.db');
 const garageDb = new sqlite3.Database('./garage.db');
-const garageLightDb = new sqlite3.Database('./garageLight');
+const garageLightDb = new sqlite3.Database('./garage_lights');
 const studyLightDb = new sqlite3.Database('./studyRoomLight.db');
 const cameraDb = new sqlite3.Database('./camera.db');
 const kitchenLightDb = new sqlite3.Database('./kitchenLight.db');
@@ -152,8 +152,8 @@ app.post('/api/garage/update', (req, res) => {
 
 
 
-app.get('/api/garageLight', (req, res) => {
-    garageLightDb.get("SELECT * FROM garageLight WHERE id = 1", [], (err, row) => {
+app.get('/api/garage_lights', (req, res) => {
+    garageLightDb.get("SELECT * FROM garage_lights WHERE id = 1", [], (err, row) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ message: 'Error fetching light settings' });
@@ -165,15 +165,15 @@ app.get('/api/garageLight', (req, res) => {
     });
 });
 
-app.post('/api/garageLight/update', (req, res) => {
+app.post('/api/garage_lights/update', (req, res) => {
     const { newPosition, newBrightness } = req.body;
-    garageLightDb.run("UPDATE garageLight SET position = ? WHERE id = 1", [newPosition], function (err) {
+    garageLightDb.run("UPDATE garage_lights SET position = ? WHERE id = 1", [newPosition], function (err) {
         if(err){
             console.error(err);
             return res.status(500).json({message: "Error saving location data"});
         }
     });
-    garageLightDb.run("Update garageLight SET brightness = ? WHERE id = 1", [newBrightness], function (err){
+    garageLightDb.run("Update garage_lights SET brightness = ? WHERE id = 1", [newBrightness], function (err){
         if(err){
             console.error(err);
             return res.status(500).json({message: "Error saving brightness data"});
