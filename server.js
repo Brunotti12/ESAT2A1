@@ -440,9 +440,7 @@ app.get('/api/coffee-machine', (req, res) => {
     CoffeeDb.run('DELETE FROM coffeeQueue WHERE status = "pending" AND timestamp < ?', [timeLimit], (err) => {
       if (err) {
         console.error('Error removing old pending orders:', err.message);
-      } else {
-        console.log('Old pending orders removed successfully');
-      }
+      } else 
     });
   }
   
