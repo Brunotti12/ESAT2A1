@@ -23,7 +23,8 @@ const kitchenLightDb = new sqlite3.Database('./kitchenLight.db');
 const LivingLightsDB = new sqlite3.Database('./livinglights.db');
 const stoveDb = new sqlite3.Database('./stove.db');
 const CoffeeDb = new sqlite3.Database('./coffeeMachine.db')
-
+const TVDb = new sqlite3.Database('Television.db');
+const SBDb = new sqlite3.Database('./Soundboxes.db');
 
 // Routes
 // Alarm System
@@ -447,6 +448,58 @@ app.get('/api/coffee-machine', (req, res) => {
   // Set interval to check for and remove old pending orders every 5 seconds
   setInterval(removeOldOrders, 5000);
   
+
+
+// Television
+// Endpoint to get the TV status
+app.get('/api/television/state', (req, res) => {
+    TVDb.get('SELECT status FROM tv WHERE id = 1', (err, row) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ state: row ? (row.status === 1 ? 'on' : 'off') : 'off' });
+    });
+});
+
+// Endpoint to update the TV status
+app.post('/api/television/state', (req, res) => {
+    const { state } = req.body;
+    const newStatus = state === 'on' ? 1 : 0;
+
+    TVDb.run('UPDATE tv SET status = ? WHERE id = 1', [newStatus], function (err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ success: true });
+    });
+});
+
+
+// Soundboxes
+// API to get the current soundbox state
+app.get('/api/soundbox/state', (req, res) => {
+    SBDb.get('SELECT status FROM sb WHERE id = 1', (err, row) => {
+      if (err) {
+        res.status(500).json({ success: false, error: err });
+        return;
+      }
+      res.json({ state: row ? (row.status === 1 ? 'on' : 'off') : 'off' });
+    });
+  });
+  
+  // API to update the soundbox state
+  app.post('/api/soundbox/state', (req, res) => {
+    const { state } = req.body;
+    const status = state === 'on' ? 1 : 0;
+  
+    SBDb.run('UPDATE sb SET status = ? WHERE id = 1', [status], function (err) {
+      if (err) {
+        res.status(500).json({ success: false, error: err });
+        return;
+      }
+      res.json({ success: true });
+    });
+  });
 
 
 
