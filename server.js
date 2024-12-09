@@ -21,6 +21,7 @@ const studyLightDb = new sqlite3.Database('./studyRoomLight.db');
 const cameraDb = new sqlite3.Database('./camera.db');
 const kitchenLightDb = new sqlite3.Database('./kitchenLight.db');
 const LivingLightsDB = new sqlite3.Database('./livinglights.db');
+const stoveDb = new sqlite3.Database('./stove.db');
 
 
 // Routes
@@ -316,6 +317,49 @@ app.post('/api/kitchenLight/update', (req, res) => {
     });
     
 }
+
+
+// Stove
+
+
+// GET endpoint to fetch stove data from the database
+app.get('/api/stove-data', (req, res) => {
+    const sql = 'SELECT * FROM stove_data ORDER BY id DESC LIMIT 1'; // Get the most recent row
+    stoveDb.get(sql, (err, row) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json({
+            S1S: row.S1S,
+            S1P: row.S1P,
+            S2S: row.S2S,
+            S2P: row.S2P,
+            S3S: row.S3S,
+            S3P: row.S3P,
+            S4S: row.S4S,
+            S4P: row.S4P,
+        });
+    });
+});
+
+// POST endpoint to update stove data in the database
+app.post('/api/update-stove', (req, res) => {
+    const { S1S, S1P, S2S, S2P, S3S, S3P, S4S, S4P } = req.body;
+
+    const sql = `
+        INSERT INTO stove_data (S1S, S1P, S2S, S2P, S3S, S3P, S4S, S4P)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+    
+    stoveDb.run(sql, [S1S, S1P, S2S, S2P, S3S, S3P, S4S, S4P], function (err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.status(200).send('Stove data updated successfully');
+    });
+});
+
 
 // Start Server
 app.listen(port, '0.0.0.0', () => {
