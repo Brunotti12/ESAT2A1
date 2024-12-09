@@ -22,6 +22,7 @@ const cameraDb = new sqlite3.Database('./camera.db');
 const kitchenLightDb = new sqlite3.Database('./kitchenLight.db');
 const LivingLightsDB = new sqlite3.Database('./livinglights.db');
 const stoveDb = new sqlite3.Database('./stove.db');
+const CoffeeDb = new sqlite3.Database('./coffeeMachine.db')
 
 
 // Routes
@@ -359,6 +360,97 @@ app.post('/api/update-stove', (req, res) => {
         res.status(200).send('Stove data updated successfully');
     });
 });
+
+
+// CoffeeMachine
+
+
+// Fetch the current state of the coffee machine
+app.get('/api/coffee-machine', (req, res) => {
+    CoffeeDb.get('SELECT power FROM coffeeMachineState ORDER BY id DESC LIMIT 1', (err, row) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      } else {
+        res.json({
+          power: row ? row.power : 0,  // Default to 0 if no data found
+        });
+      }
+    });
+  });
+  
+  // Toggle coffee machine power
+  app.post('/api/coffee-machine', (req, res) => {
+    const { power } = req.body;
+    CoffeeDb.run('INSERT INTO coffeeMachineState (power) VALUES (?)', [power ? 1 : 0], function(err) {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      } else {
+        if (power === 0) {
+          // Clear the queue when turning off the machine
+          CoffeeDb.run('DELETE FROM coffeeQueue', (err) => {
+            if (err) {
+              console.error('Error clearing queue:', err.message);
+            }
+          });
+        }
+        res.status(200).json({ success: true });
+      }
+    });
+  });
+  
+  // Get all orders from the queue
+  app.get('/api/coffee-machine/queue', (req, res) => {
+    CoffeeDb.all('SELECT * FROM coffeeQueue ORDER BY timestamp ASC', (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      } else {
+        res.json(rows);
+      }
+    });
+  });
+  
+  // Add a coffee order to the queue
+  app.post('/api/coffee-machine/order', (req, res) => {
+    const { type } = req.body;
+    const timestamp = new Date().toISOString();
+    CoffeeDb.run('INSERT INTO coffeeQueue (type, status, timestamp) VALUES (?, ?, ?)', [type, 'pending', timestamp], function(err) {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      } else {
+        res.status(200).json({ success: true, id: this.lastID });
+      }
+    });
+  });
+  
+  // Update the status of a coffee in the queue
+  app.post('/api/coffee-machine/update-status', (req, res) => {
+    const { id, status } = req.body;
+    CoffeeDb.run('UPDATE coffeeQueue SET status = ? WHERE id = ?', [status, id], function(err) {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      } else {
+        res.status(200).json({ success: true });
+      }
+    });
+  });
+  
+  // Automatically remove pending orders older than 20 seconds
+  function removeOldOrders() {
+    const timeLimit = new Date(Date.now() - 20 * 1000).toISOString();  // 20 seconds ago
+    CoffeeDb.run('DELETE FROM coffeeQueue WHERE status = "pending" AND timestamp < ?', [timeLimit], (err) => {
+      if (err) {
+        console.error('Error removing old pending orders:', err.message);
+      } else {
+        console.log('Old pending orders removed successfully');
+      }
+    });
+  }
+  
+  // Set interval to check for and remove old pending orders every 5 seconds
+  setInterval(removeOldOrders, 5000);
+  
+
+
 
 
 // Start Server
