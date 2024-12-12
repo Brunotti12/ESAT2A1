@@ -184,7 +184,7 @@
         const oldAlarmCodeInput = document.getElementById("oldAlarmCode");
         const newAlarmCodeInput = document.getElementById("newAlarmCode");
 
-        fetch('http://192.168.2.101:3000/api/settings') // Full URL
+        fetch('http://192.168.2.102:3000/api/settings') // Full URL
             .then(response => response.json())
             .then(data => {
                 let alarmCode = data.alarmCode;
@@ -222,7 +222,7 @@
                     const oldCode = oldAlarmCodeInput.value;
                     const newCode = newAlarmCodeInput.value;
 
-                    fetch('http://192.168.2.101:3000/api/settings/update', { // Full URL
+                    fetch('http://192.168.2.102:3000/api/settings/update', { // Full URL
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
