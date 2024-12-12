@@ -165,7 +165,7 @@
     <script>
     let isCameraOn;
 
-    fetch('http://localhost:3000/api/garage')
+    fetch('http://192.168.2.102:3000/api/garage')
         .then(response => response.json())
         .then(data => {
             isCameraOn = data.cameraStatus;
@@ -219,7 +219,7 @@
     // Function to send the camera status ('on' or 'off') to the Node.js backend
     async function sendCameraStatus(status) {
         try {
-            const response = await fetch('http://localhost:3000/api/camera', {
+            const response = await fetch('http://192.168.2.102:3000/api/camera', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
