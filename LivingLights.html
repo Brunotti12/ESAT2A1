@@ -170,69 +170,78 @@
     <i class="fas fa-lightbulb brightness-icon" id="brightnessIcon"></i>
 
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
         const box = document.getElementById('draggableBox');
         const balk = document.querySelector('.balk');
         const brightnessIcon = document.getElementById('brightnessIcon');
 
-        let isDragging = false;
+        fetch('http://192.168.2.102:3000/api/living-lights/update')
+            .then(response => response.json())
+            .then(data => {
+                let position = data.position;
+                let brightness = data.brightness;
 
-        // Function to fetch brightness level from the server
-        function fetchBrightness() {
-            fetch('http://192.168.2.102:3000/api/living-lights')
-                .then(response => response.json())
-                .then(data => {
-                    const brightness = data.brightness || 0; // Default to 0 if no brightness is returned
-                    const x = brightness * (balk.offsetWidth - box.offsetWidth);
-                    box.style.left = `${x}px`;
-                    brightnessIcon.style.opacity = brightness;
-                })
-                .catch(error => console.error('Error fetching brightness:', error));
-        }
-
-        // Function to send updated brightness level to the server
-        function updateBrightness(brightness) {
-            fetch('http://192.168.2.102:3000/api/living-lights/update', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ brightness })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Brightness updated:', data);
-                })
-                .catch(error => console.error('Error updating brightness:', error));
-        }
-
-        // Initial fetch of brightness level on page load
-        fetchBrightness();
-
-        // Dragging functionality
-        box.addEventListener('mousedown', () => {
-            isDragging = true;
-        });
-
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                let x = e.clientX - balk.offsetLeft - box.offsetWidth / 2;
-
-                if (x < 0) x = 0;
-                if (x > balk.offsetWidth - box.offsetWidth) x = balk.offsetWidth - box.offsetWidth;
-
-                box.style.left = `${x}px`;
-                const brightness = x / (balk.offsetWidth - box.offsetWidth);
+                box.style.left = `${position}px`;
                 brightnessIcon.style.opacity = brightness;
+            })
 
-                // Send updated brightness to the server
-                updateBrightness(brightness);
-            }
-        });
+    // Function to update garage light data on the backend
+    async function updateLightData(position, brightness) {
+        try {
+            await fetch('http://192.168.2.102:3000/api/living-lights/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ newPosition: position, newBrightness: brightness }),
+            });
+        } catch (error) {
+            console.error('Error updating light data:', error);
+        }
+    }
+
+    let debounceTimeout;
+
+    function debounceUpdate(position, brightness) {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(() => {
+            updateLightData(position, brightness);
+        }, 100); // Adjust the delay (in milliseconds) as needed
+    }
+
+
+
+    // Store the initial position and brightness
+    let isDragging = false;
+
+    box.addEventListener('mousedown', () => {
+        isDragging = true;
+    });
+
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            let x = e.clientX - balk.offsetLeft - box.offsetWidth / 2;
+
+            if (x < 0) x = 0;
+            if (x > balk.offsetWidth - box.offsetWidth) x = balk.offsetWidth - box.offsetWidth;
+
+            box.style.left = `${x}px`;
+
+            // Calculate brightness based on position
+            const brightness = x / (balk.offsetWidth - box.offsetWidth);
+            brightnessIcon.style.opacity = brightness;
+
+            // Send the updated position and brightness to the backend
+            debounceUpdate(x, brightness);
+        }
+    });
+});
+
     </script>
-
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 
 </html>
