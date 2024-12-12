@@ -284,7 +284,6 @@ app.post('/api/kitchenLight/update', (req, res) => {
     });
 });
 }
-
 // LivingLights
 {
 
