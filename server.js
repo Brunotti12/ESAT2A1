@@ -25,6 +25,8 @@ const stoveDb = new sqlite3.Database('./stove.db');
 const CoffeeDb = new sqlite3.Database('./coffeeMachine.db')
 const TVDb = new sqlite3.Database('Television.db');
 const SBDb = new sqlite3.Database('./Soundboxes.db');
+const refrigeratorDb = new sqlite3.Database('./refrigerator.db');
+
 
 // Routes
 // Alarm System
@@ -501,6 +503,33 @@ app.get('/api/soundbox/state', (req, res) => {
   });
 
 
+// Refrigerator
+{
+    app.get('/api/refrigerator', (req, res) => {
+      refrigeratorDb.get('SELECT temperature FROM refrigerator WHERE id = 1', [], (err, row) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ message: 'Error fetching refrigerator temperature' });
+        }
+        if (!row) {
+          return res.status(404).json({ message: 'Refrigerator settings not found' });
+        }
+        res.json({ temperature: row.temperature });
+      });
+    });
+  
+    app.post('/api/refrigerator/update', (req, res) => {
+      const { temperature } = req.body;
+  
+      refrigeratorDb.run('UPDATE refrigerator SET temperature = ? WHERE id = 1', [temperature], function (err) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ message: 'Error updating refrigerator temperature' });
+        }
+        res.status(200).json({ message: 'Temperature updated successfully' });
+      });
+    });
+  }
 
 
 // Start Server
