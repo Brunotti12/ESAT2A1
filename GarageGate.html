@@ -184,7 +184,7 @@
         const oldGarageCodeInput = document.getElementById("oldGarageCode");
         const newGarageCodeInput = document.getElementById("newGarageCode");
 
-        fetch('http://localhost:3000/api/garage')
+        fetch('http://192.168.2.102:3000/api/garage')
             .then(response => response.json())
             .then(data => {
                 let garageCode = data.garageCode;
@@ -196,7 +196,7 @@
 
                 gateButton.addEventListener("click", () => {
                     const controlCode = controlCodeInput.value;
-                    fetch('http://localhost:3000/api/garage/status', {
+                    fetch('http://192.168.2.102:3000/api/garage/status', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -222,7 +222,7 @@
                     const oldCode = oldGarageCodeInput.value;
                     const newCode = newGarageCodeInput.value;
 
-                    fetch('http://localhost:3000/api/garage/update', {
+                    fetch('http://192.168.2.102:3000/api/garage/update', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
