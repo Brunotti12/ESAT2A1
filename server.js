@@ -252,7 +252,6 @@ app.post('/api/studyroom-lights/update', (req, res) => {
     });
 });
 
-}
 
 // Kitchen Lights
 {
