@@ -173,13 +173,12 @@
         const box = document.getElementById('draggableBox');
         const balk = document.querySelector('.balk');
         const brightnessIcon = document.getElementById('brightnessIcon');
-        const apiUrl = 'http://192.168.2.102:3000/api/living-lights'; // Ensure this is the correct backend URL
 
         let isDragging = false;
 
         // Function to fetch brightness level from the server
         function fetchBrightness() {
-            fetch(apiUrl)
+            fetch('http://192.168.2.102:3000/api/living-lights')
                 .then(response => response.json())
                 .then(data => {
                     const brightness = data.brightness || 0; // Default to 0 if no brightness is returned
@@ -192,7 +191,7 @@
 
         // Function to send updated brightness level to the server
         function updateBrightness(brightness) {
-            fetch(apiUrl, {
+            fetch('http://192.168.2.102:3000/api/living-lights/update', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ brightness })
