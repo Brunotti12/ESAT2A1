@@ -305,7 +305,7 @@
         // Fetch initial state and queue
         async function fetchInitialData() {
             try {
-                const response = await fetch('http://localhost:3000/api/coffee-machine');
+                const response = await fetch('http://192.168.2.102:3000/api/coffee-machine');
                 const data = await response.json();
                 toggleSwitch.checked = data.power;
                 toggleLabel.textContent = data.power ? 'On' : 'Off';
@@ -314,7 +314,7 @@
                 disableButtons(!data.power);
 
                 // Fetch the coffee queue
-                const queueResponse = await fetch('http://localhost:3000/api/coffee-machine/queue');
+                const queueResponse = await fetch('http://192.168.2.102:3000/api/coffee-machine/queue');
                 const queueData = await queueResponse.json();
                 coffeeQueue = queueData;
                 updateCoffeeQueue();
@@ -327,7 +327,7 @@
         toggleSwitch.addEventListener("change", async () => {
             const isTurningOn = toggleSwitch.checked;
             try {
-                const response = await fetch('http://localhost:3000/api/coffee-machine', {
+                const response = await fetch('http://192.168.2.102:3000/api/coffee-machine', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ power: isTurningOn })
@@ -360,7 +360,7 @@
                 return;
             }
 
-            fetch('http://localhost:3000/api/coffee-machine/order', {
+            fetch('http://192.168.2.102:3000/api/coffee-machine/order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: coffeeType })
