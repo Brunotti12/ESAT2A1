@@ -182,7 +182,7 @@
         const balk = document.querySelector('.balk');
         const brightnessIcon = document.getElementById('brightnessIcon');
 
-        fetch('http://localhost:3000/api/garage_lights')
+        fetch('http://192.168.2.102:3000/api/garage_lights')
             .then(response => response.json())
             .then(data => {
                 let position = data.position;
@@ -195,7 +195,7 @@
     // Function to update garage light data on the backend
     async function updateLightData(position, brightness) {
         try {
-            await fetch('http://localhost:3000/api/garage_lights/update', {
+            await fetch('http://192.168.2.102:3000/api/garage_lights/update', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
