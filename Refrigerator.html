@@ -168,7 +168,7 @@
         const tempSlider = document.getElementById("tempSlider");
         const tempDisplay = document.getElementById("tempDisplay");
 
-        fetch('http://localhost:3000/api/refrigerator')
+        fetch('http://192.168.2.102:3000/api/refrigerator')
             .then(response => response.json())
             .then(data => {
                 let temperature = data.temperature;
@@ -186,7 +186,7 @@
             const selectedTemp = tempSlider.value;
 
             // Send the updated temperature to the server
-            fetch('http://localhost:3000/api/refrigerator/update', {
+            fetch('http://192.168.2.102:3000/api/refrigerator/update', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
